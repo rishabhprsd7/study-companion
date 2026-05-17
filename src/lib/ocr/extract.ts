@@ -1,5 +1,3 @@
-'use server'
-
 import { getVisionModel } from '@/lib/gemini/client'
 
 /**
