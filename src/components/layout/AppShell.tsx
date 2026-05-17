@@ -48,8 +48,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* Brand */}
         <div className="px-5 pt-6 pb-5">
           <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 brand-gradient">
               <Sparkles className="w-[18px] h-[18px] text-white" />
             </div>
             <div className="leading-tight">
@@ -95,10 +94,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}
           >
             <div className="flex items-center gap-2.5 mb-2.5">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}
-              >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0 brand-gradient">
                 {initial}
               </div>
               <div className="min-w-0 flex-1">

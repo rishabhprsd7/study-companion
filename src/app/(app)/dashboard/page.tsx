@@ -36,8 +36,7 @@ export default async function DashboardPage() {
       {/* Primary action */}
       <Link
         href="/upload"
-        className="group block rounded-2xl p-6 mb-4 text-white shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 animate-fade-up"
-        style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}
+        className="group block rounded-2xl p-6 mb-4 text-white shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 animate-fade-up brand-gradient"
       >
         <div className="flex items-center justify-between">
           <div>
@@ -110,8 +109,7 @@ export default async function DashboardPage() {
               Upload your first screenshot or notes to begin
             </p>
             <Link href="/upload"
-              className="inline-flex items-center gap-2 text-sm text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-all hover:shadow-md"
-              style={{ background: 'var(--accent)' }}>
+              className="inline-flex items-center gap-2 text-sm text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-all hover:shadow-md brand-gradient">
               <Plus className="w-4 h-4" /> Upload something
             </Link>
           </div>

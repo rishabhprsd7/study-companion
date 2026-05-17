@@ -195,27 +195,37 @@ export default function ChatInterface({ session, initialMode }: Props) {
         <div className="max-w-2xl mx-auto px-5 py-6 space-y-6">
           {hasNotes && (
             <div className="rounded-2xl p-4 border animate-fade-up"
-              style={{ background: 'var(--accent-soft)', borderColor: 'var(--border)' }}>
+              style={{ background: 'var(--warm-soft)', borderColor: 'color-mix(in srgb, var(--warm) 25%, transparent)' }}>
               <div className="flex items-center gap-2 mb-1.5">
-                <Sparkles className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-                <span className="font-semibold text-sm">Reading your material…</span>
+                <Sparkles className="w-4 h-4 animate-pulse-soft" style={{ color: 'var(--warm-deep)' }} />
+                <span className="font-semibold text-sm">Reading your material… ✨</span>
               </div>
               <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                Your notes are being generated. Ask me anything about it below.
+                Hang tight — I&apos;m turning this into clean notes. Ask me anything in the meantime!
               </p>
             </div>
           )}
 
           {messages.length === 0 && !hasNotes && (
             <div className="text-center py-20 animate-fade-up">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"
-                style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}>
-                <Sparkles className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-md brand-gradient animate-float">
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <p className="text-lg font-semibold mb-1">What do you want to learn?</p>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                Ask me to explain any concept, topic or formula.
+              <p className="text-xl font-bold mb-1.5">
+                Hey, I&apos;m your study buddy <span className="animate-wave inline-block">👋</span>
               </p>
+              <p className="text-sm mb-6 max-w-sm mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+                Ask me to explain anything, or upload a screenshot and I&apos;ll turn it into clean notes for you.
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                {['Explain photosynthesis simply', 'Help me with German grammar', 'Quiz me on this topic'].map(s => (
+                  <button key={s} onClick={() => { setInput(s); inputRef.current?.focus() }}
+                    className="text-xs px-3.5 py-2 rounded-full border transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                    style={{ background: 'var(--card)', borderColor: 'var(--border-strong)' }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -223,8 +233,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
             <div key={msg.id}
               className={cn('flex animate-fade-up', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
               {msg.role === 'user' ? (
-                <div className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm"
-                  style={{ background: 'var(--accent)' }}>
+                <div className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm brand-gradient">
                   {msg.content}
                 </div>
               ) : (
@@ -240,9 +249,9 @@ export default function ChatInterface({ session, initialMode }: Props) {
             <div className="flex justify-start animate-fade-up">
               <div className="rounded-2xl rounded-bl-md px-5 py-4 border flex items-center gap-1.5"
                 style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-                {[0, 1, 2].map(i => (
+                {['var(--accent)', 'var(--warm)', 'var(--success)'].map((c, i) => (
                   <span key={i} className="w-2 h-2 rounded-full animate-pulse-soft"
-                    style={{ background: 'var(--accent)', animationDelay: `${i * 0.18}s` }} />
+                    style={{ background: c, animationDelay: `${i * 0.18}s` }} />
                 ))}
               </div>
             </div>
@@ -273,7 +282,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
               value={input}
               onChange={e => { setInput(e.target.value); autoGrow() }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything…"
+              placeholder="Ask me anything — I'm here to help 😊"
               rows={1}
               className="flex-1 text-sm outline-none resize-none bg-transparent leading-relaxed py-1.5"
               style={{ minHeight: '28px', maxHeight: '160px' }}
@@ -281,8 +290,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
             <button
               onClick={sendMessage}
               disabled={!input.trim() || loading}
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30 hover:scale-105 disabled:hover:scale-100"
-              style={{ background: 'var(--accent)' }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30 hover:scale-110 disabled:hover:scale-100 brand-gradient"
             >
               <Send className="w-4 h-4 text-white" />
             </button>

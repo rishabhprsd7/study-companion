@@ -125,8 +125,7 @@ export default function UploadPage() {
   return (
     <div className="max-w-xl mx-auto px-6 py-12">
       <div className="mb-8 text-center animate-fade-up">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}>
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm brand-gradient">
           <Sparkles className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Share what you&apos;re studying</h1>

@@ -11,11 +11,16 @@
   --muted-foreground: #8a8077;
   --border: #ebe5dc;
   --border-strong: #ddd5c8;
-  --accent: #6d5dfc;
-  --accent-hover: #5b4ce0;
-  --accent-soft: #f0edff;
+  --accent: #7c5cfc;
+  --accent-hover: #6a49ec;
+  --accent-soft: #f1ecff;
   --accent-foreground: #ffffff;
+  /* Warm secondary — coral/peach for friendliness */
+  --warm: #ff7d5a;
+  --warm-soft: #fff0ea;
+  --warm-deep: #f0623c;
   --success: #2faa6a;
+  --success-soft: #e9f7ef;
   --warning: #d9920a;
   --destructive: #e0533d;
   --radius: 1rem;
@@ -34,11 +39,15 @@
   --muted-foreground: #a59c8f;
   --border: #2e2820;
   --border-strong: #3a3329;
-  --accent: #8678ff;
-  --accent-hover: #9a8eff;
-  --accent-soft: #221d33;
+  --accent: #9486ff;
+  --accent-hover: #a89cff;
+  --accent-soft: #241e38;
   --accent-foreground: #ffffff;
+  --warm: #ff8e6e;
+  --warm-soft: #2e1f1a;
+  --warm-deep: #ff7d5a;
   --success: #3fc07d;
+  --success-soft: #16271f;
   --warning: #e8a423;
   --destructive: #ef6b56;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -153,10 +162,32 @@ body {
 .animate-fade-up { animation: fade-up 0.35s cubic-bezier(0.21, 0.6, 0.35, 1) both; }
 
 @keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.45; transform: translateY(-2px); }
 }
-.animate-pulse-soft { animation: pulse-soft 1.4s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 1.3s ease-in-out infinite; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-2deg); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(16deg); }
+  40% { transform: rotate(-8deg); }
+}
+.animate-wave { animation: wave 1.8s ease-in-out; transform-origin: 70% 70%; display: inline-block; }
+
+/* Warm brand gradient — violet into coral */
+.brand-gradient { background: linear-gradient(135deg, #7c5cfc 0%, #a06bfa 45%, #ff7d5a 100%); }
+.brand-text {
+  background: linear-gradient(135deg, #7c5cfc 0%, #ff7d5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
