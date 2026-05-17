@@ -14,6 +14,10 @@ export default async function DashboardPage() {
     supabase.from('topics').select('*').eq('user_id', user!.id).lt('mastery_score', 0.5).order('mastery_score').limit(6),
   ])
 
+  // Gracefully handle missing tables (migration not yet run)
+  const dbReady = !profileRes.error?.message?.includes('relation') &&
+    !sessionsRes.error?.message?.includes('relation')
+
   const profile = profileRes.data
   const sessions: Session[] = sessionsRes.data ?? []
   const weakTopics: Topic[] = weakTopicsRes.data ?? []
@@ -25,6 +29,27 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
+      {/* Migration banner — shown when Supabase tables haven't been created yet */}
+      {!dbReady && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm">
+          <p className="font-semibold text-amber-800 mb-1">⚠️ Database setup needed</p>
+          <p className="text-amber-700 mb-2">
+            Run the migration SQL in your Supabase SQL editor to finish setup.
+          </p>
+          <a
+            href="https://supabase.com/dashboard/project/_/sql"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-800 underline font-medium"
+          >
+            Open Supabase SQL editor →
+          </a>
+          <p className="text-amber-600 mt-1 text-xs">
+            File: <code>supabase/migrations/001_initial_schema.sql</code>
+          </p>
+        </div>
+      )}
+
       {/* Greeting */}
       <div className="mb-8 animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight">{greeting}, {firstName}</h1>

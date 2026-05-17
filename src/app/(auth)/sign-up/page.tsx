@@ -16,7 +16,7 @@ const LEARNER_TYPES = [
 
 export default function SignUpPage() {
   const router = useRouter()
-  const [step, setStep] = useState<'account' | 'profile'>('account')
+  const [step, setStep] = useState<'account' | 'profile' | 'confirm'>('account')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -42,16 +42,27 @@ export default function SignUpPage() {
       return
     }
 
-    if (data.user) {
+    // Supabase may require email confirmation — handle both cases
+    const needsConfirmation = !data.session && data.user && !data.user.email_confirmed_at
+
+    if (data.user && data.session) {
+      // Session is live — save profile immediately
       await supabase.from('profiles').upsert({
         id: data.user.id,
         display_name: name,
         learner_type: learnerType || 'university',
         default_mode: 'simple',
       })
+      router.refresh()
+      router.push('/dashboard')
+    } else if (needsConfirmation) {
+      // Email confirmation required — show message instead of redirect
+      setError('')
+      setStep('confirm' as 'account' | 'profile')
+    } else {
+      router.refresh()
+      router.push('/dashboard')
     }
-
-    router.push('/dashboard')
   }
 
   return (
@@ -63,11 +74,11 @@ export default function SignUpPage() {
           </div>
           <h1 className="text-2xl font-bold">Create your account</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-            {step === 'account' ? 'Free forever. No credit card.' : 'Tell us about yourself'}
+            {step === 'account' ? 'Free forever. No credit card.' : step === 'profile' ? 'Tell us about yourself' : 'One last step'}
           </p>
         </div>
 
-        {step === 'account' ? (
+        {step !== 'confirm' && step === 'account' ? (
           <form onSubmit={handleAccount} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
@@ -129,10 +140,24 @@ export default function SignUpPage() {
           </form>
         )}
 
-        <p className="text-center text-sm mt-6" style={{ color: 'var(--muted-foreground)' }}>
-          Already have an account?{' '}
-          <Link href="/sign-in" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
-        </p>
+        {step === 'confirm' ? (
+          <div className="text-center py-4">
+            <div className="text-4xl mb-3">📬</div>
+            <h2 className="font-semibold text-lg mb-2">Check your inbox</h2>
+            <p className="text-sm mb-4" style={{ color: 'var(--muted-foreground)' }}>
+              We sent a confirmation link to <strong>{email}</strong>.
+              Click it to activate your account, then sign in.
+            </p>
+            <Link href="/sign-in" className="text-sm bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition-colors inline-block">
+              Go to sign in
+            </Link>
+          </div>
+        ) : (
+          <p className="text-center text-sm mt-6" style={{ color: 'var(--muted-foreground)' }}>
+            Already have an account?{' '}
+            <Link href="/sign-in" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
+          </p>
+        )}
       </div>
     </div>
   )
