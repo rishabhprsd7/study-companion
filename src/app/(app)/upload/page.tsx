@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, ImageIcon, FileText, Loader2, X } from 'lucide-react'
+import { ImageIcon, FileText, Loader2, X, Sparkles, ClipboardPaste } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 
 type Step = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
 
@@ -122,20 +123,32 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Upload study material</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-          Drop a screenshot, paste notes, or type a topic — AI will explain and structure it for you.
+    <div className="max-w-xl mx-auto px-6 py-12">
+      <div className="mb-8 text-center animate-fade-up">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #6d5dfc, #8678ff)' }}>
+          <Sparkles className="w-7 h-7 text-white" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Share what you&apos;re studying</h1>
+        <p className="text-sm mt-2" style={{ color: 'var(--muted-foreground)' }}>
+          Drop a screenshot or paste notes — I&apos;ll turn it into clean notes you can chat with.
         </p>
       </div>
 
       {/* Mode toggle */}
-      <div className="flex gap-2 mb-6 p-1 rounded-xl border w-fit" style={{ background: 'var(--muted)' }}>
+      <div className="flex gap-1 mb-5 p-1 rounded-xl border mx-auto w-fit"
+        style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
         {(['file', 'text'] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${mode === m ? 'bg-white shadow-sm text-indigo-700' : 'text-[var(--muted-foreground)]'}`}>
-            {m === 'file' ? '📁 File / Screenshot' : '✏️ Type notes'}
+            className={cn(
+              'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+              mode === m ? 'shadow-sm' : ''
+            )}
+            style={mode === m
+              ? { background: 'var(--card)', color: 'var(--accent)' }
+              : { color: 'var(--muted-foreground)' }}>
+            {m === 'file' ? <ImageIcon className="w-4 h-4" /> : <ClipboardPaste className="w-4 h-4" />}
+            {m === 'file' ? 'Screenshot / PDF' : 'Paste notes'}
           </button>
         ))}
       </div>
@@ -144,7 +157,8 @@ export default function UploadPage() {
         <div
           onDrop={handleFileDrop}
           onDragOver={e => e.preventDefault()}
-          className="border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer hover:border-indigo-400 transition-colors relative"
+          className="rounded-2xl p-10 text-center cursor-pointer transition-all relative border-2 border-dashed hover:border-solid"
+          style={{ background: 'var(--card)', borderColor: 'var(--border-strong)' }}
           onClick={() => document.getElementById('file-input')?.click()}
         >
           <input
@@ -155,25 +169,26 @@ export default function UploadPage() {
           {preview ? (
             <div className="relative inline-block">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview} alt="Preview" className="max-h-48 rounded-lg mx-auto" />
-              <button className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
+              <img src={preview} alt="Preview" className="max-h-56 rounded-xl mx-auto shadow-md" />
+              <button className="absolute -top-2.5 -right-2.5 w-7 h-7 text-white rounded-full flex items-center justify-center shadow-md"
+                style={{ background: 'var(--destructive)' }}
                 onClick={e => { e.stopPropagation(); setFile(null); setPreview(null) }}>
-                <X className="w-3 h-3" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                style={{ background: 'var(--muted)' }}>
-                <ImageIcon className="w-6 h-6" style={{ color: 'var(--muted-foreground)' }} />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'var(--accent-soft)' }}>
+                <ImageIcon className="w-7 h-7" style={{ color: 'var(--accent)' }} />
               </div>
-              <p className="font-medium mb-1">Drop your screenshot or PDF here</p>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>or click to browse</p>
+              <p className="font-semibold mb-1">Drop your screenshot or PDF</p>
+              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>or click to browse your files</p>
             </>
           )}
           {file && !preview && (
-            <div className="flex items-center gap-2 justify-center mt-3">
-              <FileText className="w-4 h-4 text-indigo-600" />
+            <div className="flex items-center gap-2 justify-center mt-4">
+              <FileText className="w-4 h-4" style={{ color: 'var(--accent)' }} />
               <span className="text-sm font-medium">{file.name}</span>
             </div>
           )}
@@ -182,37 +197,41 @@ export default function UploadPage() {
         <textarea
           value={textInput}
           onChange={e => setTextInput(e.target.value)}
-          placeholder="Paste your notes, type a concept, or describe what you want to learn..."
+          placeholder="Paste your notes, type a concept, or describe what you want to learn…"
           rows={8}
-          className="w-full border rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-          style={{ background: 'var(--card)' }}
+          className="w-full border rounded-2xl px-4 py-3.5 text-sm outline-none transition-shadow focus:shadow-md resize-none"
+          style={{ background: 'var(--card)', borderColor: 'var(--border-strong)' }}
         />
       )}
 
       {error && (
-        <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
+        <div className="mt-4 text-sm rounded-xl px-4 py-3 border"
+          style={{ background: 'color-mix(in srgb, var(--destructive) 8%, transparent)', color: 'var(--destructive)', borderColor: 'color-mix(in srgb, var(--destructive) 25%, transparent)' }}>
+          {error}
+        </div>
       )}
 
       <button
         onClick={handleSubmit}
         disabled={step === 'uploading' || step === 'processing' || (mode === 'file' ? !file : !textInput.trim())}
-        className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        className="mt-6 w-full text-white py-3.5 rounded-xl font-medium shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-md flex items-center justify-center gap-2"
+        style={{ background: 'var(--accent)' }}
       >
         {(step === 'uploading' || step === 'processing') ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            {step === 'uploading' ? 'Uploading...' : 'AI is processing...'}
+            {step === 'uploading' ? 'Uploading…' : 'Reading your material…'}
           </>
         ) : (
           <>
-            <Upload className="w-4 h-4" />
-            Explain &amp; generate notes
+            <Sparkles className="w-4 h-4" />
+            Generate notes
           </>
         )}
       </button>
 
       <p className="text-center text-xs mt-3" style={{ color: 'var(--muted-foreground)' }}>
-        AI will detect the topic, explain concepts, and create smart notes automatically
+        AI detects the topic, explains the concepts, and creates smart notes automatically
       </p>
     </div>
   )

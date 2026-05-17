@@ -1,54 +1,164 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  /* Warm paper-like surface, not cold white */
+  --background: #faf8f5;
+  --background-gradient: radial-gradient(120% 120% at 50% 0%, #fdfbf7 0%, #f5f1ea 100%);
+  --foreground: #1a1714;
   --card: #ffffff;
-  --card-foreground: #1c1917;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  --border: #e7e5e4;
-  --accent: #4f46e5;
+  --card-foreground: #1a1714;
+  --muted: #f3efe9;
+  --muted-foreground: #8a8077;
+  --border: #ebe5dc;
+  --border-strong: #ddd5c8;
+  --accent: #6d5dfc;
+  --accent-hover: #5b4ce0;
+  --accent-soft: #f0edff;
   --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --radius: 0.75rem;
+  --success: #2faa6a;
+  --warning: #d9920a;
+  --destructive: #e0533d;
+  --radius: 1rem;
+  --shadow-sm: 0 1px 2px rgba(26, 23, 20, 0.04), 0 1px 3px rgba(26, 23, 20, 0.04);
+  --shadow-md: 0 4px 12px rgba(26, 23, 20, 0.06), 0 2px 4px rgba(26, 23, 20, 0.04);
+  --shadow-lg: 0 12px 32px rgba(26, 23, 20, 0.08), 0 4px 8px rgba(26, 23, 20, 0.04);
 }
 
 .dark {
-  --background: #0c0a09;
-  --foreground: #fafaf9;
-  --card: #1c1917;
-  --card-foreground: #fafaf9;
-  --muted: #292524;
-  --muted-foreground: #a8a29e;
-  --border: #292524;
-  --accent: #6366f1;
+  --background: #14110e;
+  --background-gradient: radial-gradient(120% 120% at 50% 0%, #1a1611 0%, #100d0a 100%);
+  --foreground: #f7f3ee;
+  --card: #1f1b16;
+  --card-foreground: #f7f3ee;
+  --muted: #262019;
+  --muted-foreground: #a59c8f;
+  --border: #2e2820;
+  --border-strong: #3a3329;
+  --accent: #8678ff;
+  --accent-hover: #9a8eff;
+  --accent-soft: #221d33;
   --accent-foreground: #ffffff;
+  --success: #3fc07d;
+  --warning: #e8a423;
+  --destructive: #ef6b56;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
 * {
   border-color: var(--border);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
+html, body {
+  height: 100%;
 }
 
-.prose-study h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; margin-top: 1.25rem; }
-.prose-study h2 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 1rem; }
-.prose-study h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 0.75rem; }
-.prose-study p  { margin-bottom: 0.75rem; line-height: 1.7; }
-.prose-study ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-.prose-study ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-.prose-study li { margin-bottom: 0.25rem; }
-.prose-study code { background: #f5f5f4; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875rem; font-family: monospace; }
-.prose-study pre { background: #f5f5f4; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem; overflow-x: auto; }
-.prose-study strong { font-weight: 600; }
-.prose-study blockquote { border-left: 4px solid #a5b4fc; padding-left: 1rem; font-style: italic; color: #78716c; margin-bottom: 0.75rem; }
+body {
+  background: var(--background);
+  background-image: var(--background-gradient);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ============================================
+   Rich AI output — renders like a polished
+   study note: tables, callouts, vocab grids
+   ============================================ */
+.prose-study { font-size: 0.9375rem; line-height: 1.7; color: var(--foreground); }
+.prose-study > *:first-child { margin-top: 0; }
+.prose-study > *:last-child { margin-bottom: 0; }
+
+.prose-study h1 { font-size: 1.35rem; font-weight: 700; margin: 1.5rem 0 0.85rem; letter-spacing: -0.01em; }
+.prose-study h2 { font-size: 1.15rem; font-weight: 700; margin: 1.35rem 0 0.65rem; letter-spacing: -0.01em; }
+.prose-study h3 { font-size: 1rem; font-weight: 650; margin: 1.1rem 0 0.5rem; }
+.prose-study h1:first-child, .prose-study h2:first-child { margin-top: 0; }
+
+.prose-study p { margin: 0 0 0.85rem; }
+.prose-study a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+.prose-study ul { list-style: disc; padding-left: 1.35rem; margin: 0 0 0.85rem; }
+.prose-study ol { list-style: decimal; padding-left: 1.35rem; margin: 0 0 0.85rem; }
+.prose-study li { margin-bottom: 0.35rem; padding-left: 0.15rem; }
+.prose-study li::marker { color: var(--accent); }
+
+.prose-study strong { font-weight: 700; color: var(--foreground); }
+.prose-study em { font-style: italic; }
+
+.prose-study code {
+  background: var(--muted);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.4rem;
+  font-size: 0.85em;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  border: 1px solid var(--border);
+}
+.prose-study pre {
+  background: var(--muted);
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  margin: 0 0 0.85rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+.prose-study pre code { background: none; border: none; padding: 0; font-size: 0.85rem; }
+
+/* Tables — the key to ChatGPT-style vocab/grammar grids */
+.prose-study table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.prose-study thead { background: var(--accent-soft); }
+.prose-study th {
+  text-align: left;
+  font-weight: 700;
+  padding: 0.65rem 0.9rem;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+.prose-study td {
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+.prose-study tbody tr:last-child td { border-bottom: none; }
+.prose-study tbody tr:nth-child(even) { background: var(--muted); }
+
+/* Blockquote → callout box for grammar rules / key points */
+.prose-study blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 0.75rem 1rem;
+  border-radius: 0 0.6rem 0.6rem 0;
+  margin: 0 0 0.85rem;
+  color: var(--foreground);
+}
+.prose-study blockquote p:last-child { margin-bottom: 0; }
+
+.prose-study hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+/* Utility animations */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.35s cubic-bezier(0.21, 0.6, 0.35, 1) both; }
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-soft { animation: pulse-soft 1.4s ease-in-out infinite; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
