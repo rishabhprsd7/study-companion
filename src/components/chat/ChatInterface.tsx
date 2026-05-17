@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Loader2, BookOpen, Dumbbell, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { Send, Sparkles, ChevronDown, ArrowLeft, Check } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import type { ExplanationMode } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -40,14 +43,19 @@ export default function ChatInterface({ session, initialMode }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // If no messages yet and we have an upload, show initial notes
   const uploads = session.uploads ?? []
   const hasNotes = uploads.length > 0 && messages.length === 0
+
+  function autoGrow() {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+  }
 
   async function sendMessage() {
     const content = input.trim()
@@ -56,6 +64,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
     const userMsg: Message = { id: Date.now().toString(), role: 'user', content }
     setMessages(prev => [...prev, userMsg])
     setInput('')
+    if (inputRef.current) inputRef.current.style.height = 'auto'
     setLoading(true)
 
     try {
@@ -82,7 +91,6 @@ export default function ChatInterface({ session, initialMode }: Props) {
           const { done, value } = await reader.read()
           if (done) break
           const chunk = decoder.decode(value, { stream: true })
-          // Parse SSE data lines
           const lines = chunk.split('\n')
           for (const line of lines) {
             if (line.startsWith('data: ')) {
@@ -103,7 +111,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
           }
         }
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
@@ -122,140 +130,176 @@ export default function ChatInterface({ session, initialMode }: Props) {
     }
   }
 
+  const suggestions = [
+    'Explain this simply',
+    'Give me 3 examples',
+    'Make a quiz on this',
+    'Summarise the key points',
+  ]
+
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <div className="border-b px-5 py-3 flex items-center justify-between shrink-0" style={{ background: 'var(--card)' }}>
-        <div>
-          <h1 className="font-semibold text-sm">{session.title ?? session.subject ?? 'Study session'}</h1>
-          <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            {uploads.length > 0 ? `${uploads.length} upload${uploads.length > 1 ? 's' : ''}` : 'Chat session'}
-          </p>
+      <header
+        className="px-5 py-3 flex items-center justify-between shrink-0 border-b backdrop-blur-sm"
+        style={{ background: 'color-mix(in srgb, var(--card) 85%, transparent)', borderColor: 'var(--border)' }}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href="/dashboard"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--muted)] shrink-0"
+            style={{ color: 'var(--muted-foreground)' }}>
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-semibold text-sm truncate">{session.title ?? session.subject ?? 'Study session'}</h1>
+            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              {session.subject ? session.subject : uploads.length > 0 ? `${uploads.length} upload${uploads.length > 1 ? 's' : ''}` : 'Chat session'}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Mode picker */}
-          <div className="relative">
-            <button
-              onClick={() => setShowModeMenu(v => !v)}
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border hover:border-indigo-400 transition-colors"
-            >
-              {MODES.find(m => m.value === mode)?.label}
-              <ChevronDown className="w-3 h-3" />
-            </button>
-            {showModeMenu && (
-              <div className="absolute right-0 top-full mt-1 border rounded-xl shadow-lg z-10 py-1 w-48" style={{ background: 'var(--card)' }}>
+
+        {/* Mode picker */}
+        <div className="relative shrink-0">
+          <button
+            onClick={() => setShowModeMenu(v => !v)}
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors hover:bg-[var(--muted)]"
+            style={{ borderColor: 'var(--border-strong)' }}
+          >
+            <span style={{ color: 'var(--accent)' }}>●</span>
+            {MODES.find(m => m.value === mode)?.label}
+            <ChevronDown className="w-3 h-3" />
+          </button>
+          {showModeMenu && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowModeMenu(false)} />
+              <div className="absolute right-0 top-full mt-1.5 border rounded-xl z-20 py-1.5 w-56 overflow-hidden"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)', boxShadow: 'var(--shadow-lg)' }}>
                 {MODES.map(m => (
                   <button key={m.value} onClick={() => { setMode(m.value); setShowModeMenu(false) }}
-                    className={cn(
-                      'w-full text-left px-3 py-2 text-sm hover:bg-[var(--muted)] transition-colors',
-                      mode === m.value && 'text-indigo-600 font-medium'
-                    )}>
-                    <div className="font-medium">{m.label}</div>
-                    <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{m.desc}</div>
+                    className="w-full text-left px-3.5 py-2.5 transition-colors hover:bg-[var(--muted)] flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-medium" style={mode === m.value ? { color: 'var(--accent)' } : {}}>{m.label}</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{m.desc}</div>
+                    </div>
+                    {mode === m.value && <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: 'var(--accent)' }} />}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
-      </div>
+      </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-        {hasNotes && (
-          <div className="border rounded-2xl p-4 text-sm" style={{ background: 'var(--muted)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
-              <span className="font-medium">Material uploaded — notes are being generated...</span>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-5 py-6 space-y-6">
+          {hasNotes && (
+            <div className="rounded-2xl p-4 border animate-fade-up"
+              style={{ background: 'var(--warm-soft)', borderColor: 'color-mix(in srgb, var(--warm) 25%, transparent)' }}>
+              <div className="flex items-center gap-2 mb-1.5">
+                <Sparkles className="w-4 h-4 animate-pulse-soft" style={{ color: 'var(--warm-deep)' }} />
+                <span className="font-semibold text-sm">Reading your material… ✨</span>
+              </div>
+              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                Hang tight — I&apos;m turning this into clean notes. Ask me anything in the meantime!
+              </p>
             </div>
-            <p style={{ color: 'var(--muted-foreground)' }}>Ask me anything about your material, or wait for the notes to appear.</p>
-          </div>
-        )}
+          )}
 
-        {messages.length === 0 && !hasNotes && (
-          <div className="text-center py-16">
-            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <Dumbbell className="w-6 h-6 text-indigo-600" />
+          {messages.length === 0 && !hasNotes && (
+            <div className="text-center py-20 animate-fade-up">
+              <div className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-md brand-gradient animate-float">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-xl font-bold mb-1.5">
+                Hey, I&apos;m your study buddy <span className="animate-wave inline-block">👋</span>
+              </p>
+              <p className="text-sm mb-6 max-w-sm mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+                Ask me to explain anything, or upload a screenshot and I&apos;ll turn it into clean notes for you.
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                {['Explain photosynthesis simply', 'Help me with German grammar', 'Quiz me on this topic'].map(s => (
+                  <button key={s} onClick={() => { setInput(s); inputRef.current?.focus() }}
+                    className="text-xs px-3.5 py-2 rounded-full border transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                    style={{ background: 'var(--card)', borderColor: 'var(--border-strong)' }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="font-medium mb-1">What do you want to learn?</p>
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              Ask me to explain any concept, topic, or formula.
-            </p>
-          </div>
-        )}
+          )}
 
-        {messages.map(msg => (
-          <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-            <div className={cn(
-              'max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed',
-              msg.role === 'user'
-                ? 'bg-indigo-600 text-white rounded-br-sm'
-                : 'border rounded-bl-sm prose-study'
-            )} style={msg.role === 'assistant' ? { background: 'var(--card)' } : {}}>
-              {msg.role === 'assistant' ? (
-                <div dangerouslySetInnerHTML={{ __html: markdownToHtml(msg.content) }} />
+          {messages.map(msg => (
+            <div key={msg.id}
+              className={cn('flex animate-fade-up', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+              {msg.role === 'user' ? (
+                <div className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm brand-gradient">
+                  {msg.content}
+                </div>
               ) : (
-                msg.content
+                <div className="max-w-full w-full rounded-2xl rounded-bl-md px-5 py-4 border prose-study"
+                  style={{ background: 'var(--card)', borderColor: 'var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || '…'}</ReactMarkdown>
+                </div>
               )}
             </div>
-          </div>
-        ))}
+          ))}
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="border rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-2" style={{ background: 'var(--card)' }}>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: 'var(--muted-foreground)' }} />
-              <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Thinking...</span>
+          {loading && (
+            <div className="flex justify-start animate-fade-up">
+              <div className="rounded-2xl rounded-bl-md px-5 py-4 border flex items-center gap-1.5"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+                {['var(--accent)', 'var(--warm)', 'var(--success)'].map((c, i) => (
+                  <span key={i} className="w-2 h-2 rounded-full animate-pulse-soft"
+                    style={{ background: c, animationDelay: `${i * 0.18}s` }} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={bottomRef} />
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input */}
-      <div className="border-t px-4 py-3 shrink-0" style={{ background: 'var(--card)' }}>
-        <div className="flex items-end gap-2 border rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500" style={{ background: 'var(--background)' }}>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask me anything... (Enter to send)"
-            rows={1}
-            className="flex-1 text-sm outline-none resize-none bg-transparent leading-relaxed py-1 max-h-32"
-            style={{ minHeight: '24px' }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || loading}
-            className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0 hover:bg-indigo-700 transition-colors disabled:opacity-40"
-          >
-            <Send className="w-3.5 h-3.5 text-white" />
-          </button>
+      <div className="shrink-0 border-t" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+        <div className="max-w-2xl mx-auto px-5 py-4">
+          {messages.length > 0 && !loading && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {suggestions.map(s => (
+                <button key={s} onClick={() => { setInput(s); inputRef.current?.focus() }}
+                  className="text-xs px-3 py-1.5 rounded-full border transition-colors hover:bg-[var(--muted)]"
+                  style={{ borderColor: 'var(--border-strong)', color: 'var(--muted-foreground)' }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex items-end gap-2 border rounded-2xl px-3 py-2 transition-shadow focus-within:shadow-md"
+            style={{ background: 'var(--background)', borderColor: 'var(--border-strong)' }}>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={e => { setInput(e.target.value); autoGrow() }}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask me anything — I'm here to help 😊"
+              rows={1}
+              className="flex-1 text-sm outline-none resize-none bg-transparent leading-relaxed py-1.5"
+              style={{ minHeight: '28px', maxHeight: '160px' }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || loading}
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30 hover:scale-110 disabled:hover:scale-100 brand-gradient"
+            >
+              <Send className="w-4 h-4 text-white" />
+            </button>
+          </div>
+          <p className="text-center text-xs mt-2" style={{ color: 'var(--muted-foreground)' }}>
+            <span className="font-medium capitalize">{mode}</span> mode · Enter to send · Shift+Enter for new line
+          </p>
         </div>
-        <p className="text-center text-xs mt-1.5" style={{ color: 'var(--muted-foreground)' }}>
-          Mode: <span className="font-medium capitalize">{mode}</span> · Shift+Enter for new line
-        </p>
       </div>
     </div>
   )
-}
-
-// Minimal markdown → HTML (no deps needed for basic formatting)
-function markdownToHtml(md: string): string {
-  return md
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>[\s\S]*<\/li>)/, '<ul>$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hublp])(.+)$/gm, '<p>$1</p>')
-    .replace(/<p><\/p>/g, '')
 }

@@ -20,9 +20,18 @@ export default function SignInPage() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setError(error.message)
+      // Make the Supabase error message friendlier
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setError('Please confirm your email first — check your inbox for a verification link.')
+      } else if (error.message.toLowerCase().includes('invalid login')) {
+        setError('Incorrect email or password.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
+      // Refresh the server session before navigating so middleware sees the cookie
+      router.refresh()
       router.push('/dashboard')
     }
   }
