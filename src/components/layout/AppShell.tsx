@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Brain, LayoutDashboard, Upload, MessageSquare, BookOpen, Dumbbell, Clock, LogOut } from 'lucide-react'
+import { Brain, LayoutDashboard, Upload, Dumbbell, Clock, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'

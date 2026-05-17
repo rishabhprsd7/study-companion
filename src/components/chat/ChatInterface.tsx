@@ -103,7 +103,7 @@ export default function ChatInterface({ session, initialMode }: Props) {
           }
         }
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
